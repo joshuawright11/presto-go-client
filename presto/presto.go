@@ -868,32 +868,29 @@ func (c *typeConverter) ConvertValue(v interface{}) (driver.Value, error) {
 			return nil, err
 		}
 		return v, nil
-	default:
-		if strings.HasPrefix(c.typeName, "row(") {
-			values, ok := v.([]interface{})
-			if !ok {
-				return nil, fmt.Errorf("can't convert type to row: %q", c.typeName)
-			}
-
-			rowItems := parseRowItems(c.typeName)
-			if len(rowItems) != len(values) {
-				return nil, fmt.Errorf("there should be as many types as there are values")
-			}
-
-			m := map[string]driver.Value{}
-
-			for pos, item := range rowItems {
-				converter := newTypeConverter(item.typeName)
-				value, err := converter.ConvertValue(values[pos])
-				if err != nil {
-					return nil, err
-				} else {
-					m[item.name] = value
-					fmt.Printf("type passed %s\n", item.typeName)
-				}
-			}
-			return m, nil
+	case "row":
+		values, ok := v.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("can't convert type to row: %q", c.typeName)
 		}
+
+		rowItems := parseRowItems(c.typeName)
+		if len(rowItems) != len(values) {
+			return nil, fmt.Errorf("there should be as many types as there are values")
+		}
+
+		m := map[string]driver.Value{}
+
+		for pos, item := range rowItems {
+			converter := newTypeConverter(item.typeName)
+			value, err := converter.ConvertValue(values[pos])
+			if err != nil {
+				return nil, err
+			}
+			m[item.name] = value
+		}
+		return m, nil
+	default:
 		return nil, fmt.Errorf("type not supported: %q", c.typeName)
 	}
 }
