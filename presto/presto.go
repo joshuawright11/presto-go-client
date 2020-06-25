@@ -886,7 +886,7 @@ func (c *typeConverter) ConvertValue(v interface{}) (driver.Value, error) {
 				converter := newTypeConverter(item.typeName)
 				value, err := converter.ConvertValue(values[pos])
 				if err != nil {
-					fmt.Printf("Error converting value of %s: %s\n", item.name, err.Error())
+					return nil, err
 				} else {
 					m[item.name] = value
 					fmt.Printf("type passed %s\n", item.typeName)
